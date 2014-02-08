@@ -1,16 +1,23 @@
 {
     "name": "happyaccidents/dic-benchmark",
     "license": "MIT",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/kenjis/Dice"
+        }
+    ],
     "require": {
         "php": ">=5.4",
-        "orno/di": "dev-master",
-        "pimple/pimple": "dev-trigger",
-        "illuminate/container": "4.0.*",
-        "zendframework/zend-di": "dev-master",
-        "symfony/dependency-injection": "2.2.*@dev",
-        "aura/di": "dev-master",
+        "orno/di": "v2.0.3",
+        "pimple/pimple": "v1.1.1",
+        "illuminate/container": "v4.1.21",
+        "zendframework/zend-di": "2.2.5",
+        "symfony/dependency-injection": "v2.4.1",
+        "aura/di": "2.0.*@dev",
         "mnapoli/php-di": "3.0.*",
-        "league/di": "dev-master"
+        "league/di": "1.2.0",
+        "jasrags/dice": "dev-develop"
     },
     "minimum-stability": "dev",
     "extra": {

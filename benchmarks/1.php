@@ -34,6 +34,7 @@ for ($i = 0; $i < 1000; $i++) {
     $illuminate->bind('Benchmark\Stubs\BazInterface', 'Benchmark\Stubs\Baz');
     $illuminate->bind('Benchmark\Stubs\BartInterface', 'Benchmark\Stubs\Bart');
     $foo = $illuminate->make('Foo');
+    //var_dump($foo); exit;
     $bm->end('benchmark1', 'laravel');
     unset($illuminate);
     unset($foo);
@@ -43,11 +44,12 @@ for ($i = 0; $i < 1000; $i++) {
 for ($i = 0; $i < 1000; $i++) {
 
     // Orno\Di
-    $orno = (new Orno\Di\Container);
+    $orno = new Orno\Di\Container;
     $bm->start('benchmark1', 'orno');
-    $orno->register('Benchmark\Stubs\BazInterface', 'Benchmark\Stubs\Baz', false, true);
-    $orno->register('Benchmark\Stubs\BartInterface', 'Benchmark\Stubs\Bart', false, true);
-    $foo = $orno->resolve('Benchmark\Stubs\Foo');
+    $orno->add('Benchmark\Stubs\BazInterface', 'Benchmark\Stubs\Baz');
+    $orno->add('Benchmark\Stubs\BartInterface', 'Benchmark\Stubs\Bart');
+    $foo = $orno->get('Benchmark\Stubs\Foo');
+    //var_dump($foo); exit; // @TODO NG
     $bm->end('benchmark1', 'orno');
     unset($orno);
     unset($foo);
@@ -62,25 +64,27 @@ for ($i = 0; $i < 1000; $i++) {
     $league->bind('Benchmark\Stubs\BazInterface', 'Benchmark\Stubs\Baz');
     $league->bind('Benchmark\Stubs\BartInterface', 'Benchmark\Stubs\Bart');
     $foo = $league->resolve('Benchmark\Stubs\Foo');
+    //var_dump($foo); exit;
     $bm->end('benchmark1', 'league');
-    unset($orno);
+    unset($league);
     unset($foo);
 
 }
 
-for ($i = 0; $i < 1000; $i++) {
-
-    // Zend\Di
-    $zend = new Zend\Di\Di;
-    $bm->start('benchmark1', 'zend');
-    $zend->instanceManager()->addTypePreference('Benchmark\Stubs\BazInterface', 'Benchmark\Stubs\Baz');
-    $zend->instanceManager()->addTypePreference('Benchmark\Stubs\BartInterface', 'Benchmark\Stubs\Bart');
-    $foo = $zend->get('Benchmark\Stubs\Foo');
-    $bm->end('benchmark1', 'zend');
-    unset($zend);
-    unset($foo);
-
-}
+//for ($i = 0; $i < 1000; $i++) {
+//
+//    // Zend\Di
+//    $zend = new Zend\Di\Di;
+//    $bm->start('benchmark1', 'zend');
+//    $zend->instanceManager()->addTypePreference('Benchmark\Stubs\BazInterface', 'Benchmark\Stubs\Baz');
+//    $zend->instanceManager()->addTypePreference('Benchmark\Stubs\BartInterface', 'Benchmark\Stubs\Bart');
+//    $foo = $zend->get('Benchmark\Stubs\Foo');
+//    var_dump($foo); exit; // @TODO NG
+//    $bm->end('benchmark1', 'zend');
+//    unset($zend);
+//    unset($foo);
+//
+//}
 
 for ($i = 0; $i < 1000; $i++) {
 
@@ -99,12 +103,31 @@ for ($i = 0; $i < 1000; $i++) {
         )
     );
     $foo = $phpdi->get('Benchmark\Stubs\Foo');
+    //var_dump($foo); exit;
     $bm->end('benchmark1', 'php-di');
     unset($phpdi);
     unset($foo);
 
 }
 
+for ($i = 0; $i < 1000; $i++) {
+
+    // Dice
+    $dice = new Jasrags\Dice;
+    $bm->start('benchmark1', 'dice');
+    $rule = new Jasrags\Dice\Rule;
+    $rule->substitutions['Benchmark\Stubs\BazInterface'] = new Jasrags\Dice\Instance('Benchmark\Stubs\Baz');
+    $dice->addRule('Benchmark\Stubs\Bar', $rule);
+    $rule = new Jasrags\Dice\Rule;
+    $rule->substitutions['Benchmark\Stubs\BartInterface'] = new Jasrags\Dice\Instance('Benchmark\Stubs\Bart');
+    $dice->addRule('Benchmark\Stubs\Bam', $rule);
+    $foo = $dice->create('Benchmark\Stubs\Foo');
+    //var_dump($foo); exit;
+    $bm->end('benchmark1', 'dice');
+    unset($dice, $rule);
+    unset($foo);
+
+}
 ?>
 
 <!doctype html>
@@ -128,8 +151,8 @@ for ($i = 0; $i < 1000; $i++) {
             ['Illuminate\\Container', <?= $bm->getBenchmarkTotal('benchmark1', 'laravel') ?>],
             ['Orno\\Di', <?= $bm->getBenchmarkTotal('benchmark1', 'orno') ?>],
             ['League\\Di', <?= $bm->getBenchmarkTotal('benchmark1', 'league') ?>],
-            ['Zend\\Di', <?= $bm->getBenchmarkTotal('benchmark1', 'zend') ?>],
-            ['PHP-DI', <?= $bm->getBenchmarkTotal('benchmark1', 'php-di') ?>]
+            ['PHP-DI', <?= $bm->getBenchmarkTotal('benchmark1', 'php-di') ?>],
+            ['Dice', <?= $bm->getBenchmarkTotal('benchmark1', 'dice') ?>]
         ]);
 
         var options = {};

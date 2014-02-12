@@ -15,7 +15,7 @@
         "zendframework/zend-di": "2.2.5",
         "symfony/dependency-injection": "v2.4.1",
         "aura/di": "2.0.*@dev",
-        "mnapoli/php-di": "3.0.*",
+        "mnapoli/php-di": "~4.0",
         "league/di": "1.2.0",
         "jasrags/dice": "dev-develop"
     },

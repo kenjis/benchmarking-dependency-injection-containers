@@ -17,6 +17,14 @@ unset($baz);
 unset($bam);
 unset($bart);
 
+function check($foo)
+{
+    if (! $foo->bar->baz->bam->bart instanceof Benchmark\Stubs\Bart) {
+        var_dump($foo); exit;
+    }
+}
+
+
 $bm = new Benchmark\Timer;
 
 /*******************************************************************************
@@ -34,27 +42,27 @@ for ($i = 0; $i < 1000; $i++) {
     $illuminate->bind('Benchmark\Stubs\BazInterface', 'Benchmark\Stubs\Baz');
     $illuminate->bind('Benchmark\Stubs\BartInterface', 'Benchmark\Stubs\Bart');
     $foo = $illuminate->make('Foo');
-    //var_dump($foo); exit;
+    check($foo);
     $bm->end('benchmark1', 'laravel');
     unset($illuminate);
     unset($foo);
 
 }
 
-for ($i = 0; $i < 1000; $i++) {
-
-    // Orno\Di
-    $orno = new Orno\Di\Container;
-    $bm->start('benchmark1', 'orno');
-    $orno->add('Benchmark\Stubs\BazInterface', 'Benchmark\Stubs\Baz');
-    $orno->add('Benchmark\Stubs\BartInterface', 'Benchmark\Stubs\Bart');
-    $foo = $orno->get('Benchmark\Stubs\Foo');
-    //var_dump($foo); exit; // @TODO NG
-    $bm->end('benchmark1', 'orno');
-    unset($orno);
-    unset($foo);
-
-}
+//for ($i = 0; $i < 1000; $i++) {
+//
+//    // Orno\Di
+//    $orno = new Orno\Di\Container;
+//    $bm->start('benchmark1', 'orno');
+//    $orno->add('Benchmark\Stubs\BazInterface', 'Benchmark\Stubs\Baz');
+//    $orno->add('Benchmark\Stubs\BartInterface', 'Benchmark\Stubs\Bart');
+//    $foo = $orno->get('Benchmark\Stubs\Foo');
+//    check($foo); // @TODO NG
+//    $bm->end('benchmark1', 'orno');
+//    unset($orno);
+//    unset($foo);
+//
+//}
 
 for ($i = 0; $i < 1000; $i++) {
 
@@ -64,7 +72,7 @@ for ($i = 0; $i < 1000; $i++) {
     $league->bind('Benchmark\Stubs\BazInterface', 'Benchmark\Stubs\Baz');
     $league->bind('Benchmark\Stubs\BartInterface', 'Benchmark\Stubs\Bart');
     $foo = $league->resolve('Benchmark\Stubs\Foo');
-    //var_dump($foo); exit;
+    check($foo);
     $bm->end('benchmark1', 'league');
     unset($league);
     unset($foo);
@@ -79,7 +87,7 @@ for ($i = 0; $i < 1000; $i++) {
 //    $zend->instanceManager()->addTypePreference('Benchmark\Stubs\BazInterface', 'Benchmark\Stubs\Baz');
 //    $zend->instanceManager()->addTypePreference('Benchmark\Stubs\BartInterface', 'Benchmark\Stubs\Bart');
 //    $foo = $zend->get('Benchmark\Stubs\Foo');
-//    var_dump($foo); exit; // @TODO NG
+//    check($foo); // @TODO NG
 //    $bm->end('benchmark1', 'zend');
 //    unset($zend);
 //    unset($foo);
@@ -89,21 +97,14 @@ for ($i = 0; $i < 1000; $i++) {
 for ($i = 0; $i < 1000; $i++) {
 
     // PHP-DI
-    $phpdi = new DI\Container();
+    $builder = new DI\ContainerBuilder();
     $bm->start('benchmark1', 'php-di');
-    $phpdi->useAnnotations(false);
-    $phpdi->addDefinitions(
-        array(
-             'Benchmark\Stubs\BazInterface'  => array(
-                 'class' => 'Benchmark\Stubs\Baz'
-             ),
-             'Benchmark\Stubs\BartInterface'  => array(
-                 'class' => 'Benchmark\Stubs\Bart'
-             ),
-        )
-    );
+    $builder->useAnnotations(false);
+    $phpdi = $builder->build();
+    $phpdi->set('Benchmark\Stubs\BazInterface', DI\object('Benchmark\Stubs\Baz'));
+    $phpdi->set('Benchmark\Stubs\BartInterface', DI\object('Benchmark\Stubs\Bart'));
     $foo = $phpdi->get('Benchmark\Stubs\Foo');
-    //var_dump($foo); exit;
+    check($foo);
     $bm->end('benchmark1', 'php-di');
     unset($phpdi);
     unset($foo);
@@ -122,7 +123,7 @@ for ($i = 0; $i < 1000; $i++) {
     $rule->substitutions['Benchmark\Stubs\BartInterface'] = new Jasrags\Dice\Instance('Benchmark\Stubs\Bart');
     $dice->addRule('Benchmark\Stubs\Bam', $rule);
     $foo = $dice->create('Benchmark\Stubs\Foo');
-    //var_dump($foo); exit;
+    check($foo);
     $bm->end('benchmark1', 'dice');
     unset($dice, $rule);
     unset($foo);
@@ -149,7 +150,6 @@ for ($i = 0; $i < 1000; $i++) {
         var data = google.visualization.arrayToDataTable([
             ['Component', 'Time Taken'],
             ['Illuminate\\Container', <?= $bm->getBenchmarkTotal('benchmark1', 'laravel') ?>],
-            ['Orno\\Di', <?= $bm->getBenchmarkTotal('benchmark1', 'orno') ?>],
             ['League\\Di', <?= $bm->getBenchmarkTotal('benchmark1', 'league') ?>],
             ['PHP-DI', <?= $bm->getBenchmarkTotal('benchmark1', 'php-di') ?>],
             ['Dice', <?= $bm->getBenchmarkTotal('benchmark1', 'dice') ?>]
